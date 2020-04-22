@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="45dd5a42-f86f-4dc3-93e3-136716e54d29" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="cab27722-13aa-455b-afcc-f7a8d4dbd057" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Sanjit@22" database="database1a" />
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="c8f77ebc-dd4f-479a-9945-922d1c3da12e" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Sanjit@22" database="database1a" />
+	</db:config>
+	<flow name="db-mule-demoflowFlow" doc:id="12b1b3ee-ba4f-4691-92a9-b6545be068da" >
+		<http:listener doc:name="Listener" doc:id="28e049bb-ce46-4c2b-ad91-283054094d1f" config-ref="HTTP_Listener_config" path="/populations" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.Country default '']" doc:name="Set Variable" doc:id="76a834b6-eed2-41bf-8a77-c8d7e15581ae" variableName="countryVar"/>
+		<choice doc:name="Choice" doc:id="eccf9ae5-1161-48c8-9098-8f9809d0f695" tracking:enable-default-events="true">
+			<when expression="#[vars.countryVar !='']">
+				<db:select doc:name="Select" doc:id="2b4f8bac-d704-4254-88f1-005e1647d381" config-ref="Database_Config1">
+					<db:sql >SELECT * FROM database1a.Employees WHERE Country=:Country;</db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	Country: vars.countryVar
+}]]]></db:input-parameters>
+				</db:select>
+			</when>
+			<otherwise >
+				<db:select doc:name="Select" doc:id="8c1568e9-281e-48d1-8190-f356671e9eb4" config-ref="Database_Config">
+			<db:sql>SELECT * FROM database1a.employees;</db:sql>
+		</db:select>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="e4afb2af-c856-4496-83d0-254ae3b7fa9d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

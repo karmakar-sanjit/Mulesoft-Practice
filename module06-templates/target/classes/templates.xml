@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="validateArray" doc:id="c76bccc8-f30a-402e-8b56-63c84aa69dfb" >
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="f950d3cd-61f3-423c-aea1-290c291da306" message="Payload is empty, which it should not be empty. Logging the incident."/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4b24c4b2-0fa9-4105-b91c-02e0741c0c1b" type="VALIDATION:EMPTY_COLLECTION">
+				<logger level="INFO" doc:name="Logger" doc:id="4e0e609b-7e4a-42ca-ac5e-1cf7ddc0191e" message="Logging empty payload incident at: #[now()]"/>
+				<set-payload value="#[[]]" doc:name="Set Payload" doc:id="c77fddf1-8ab6-41fb-89c9-f4b6bf108e19" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="Details" format="csv">
+      <types:shape format="weave"><![CDATA[%dw 2.0
+
+type Details = Array<{|  permalink: String,   company: String,   numEmps: String,   category: String,   city: String,   state: String,   fundedDate: String,   raisedAmt: String,   raisedCurrency: String,   round: String|}>
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+    <types:type name="a2" format="json">
+      <types:shape format="weave" example="examples/a2.json"><![CDATA[%dw 2.0
+
+type a2 = {|
+  permalink: String, 
+  company: String, 
+  numEmps: String, 
+  catagory: String, 
+  city: String, 
+  state: String, 
+  fundedDate: String, 
+  raisedAmt: String, 
+  raisedCurrency: String, 
+  round: String
+|} {"example": "{\\\"permalink\\\":\\\"abcd\\\",\\\"company\\\":\\\"facebook\\\",\\\"numEmps\\\":\\\"105\\\",\\\"catagory\\\":\\\"web\\\",\\\"city\\\":\\\"San Francisco\\\",\\\"state\\\":\\\"CA\\\",\\\"fundedDate\\\":\\\"01-12-2006\\\",\\\"raisedAmt\\\":\\\"85000000\\\",\\\"raisedCurrency\\\":\\\"USD\\\",\\\"round\\\":\\\"b\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#c9d98c9d-28ab-43b0-8751-0ee323b7850d">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#15a95df4-2ce1-4aad-afe0-d02c2446a98c">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#25ff70e3-8572-4004-9175-b9ba964139b2">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c0edb891-c604-4c1d-b245-db253fc037b8">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="a2"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#fba9af24-bf8d-48f0-abe4-8958bb3272bc">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#843fe466-8021-4e12-b378-fe4e50598f6c">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c650536a-486a-494d-9e0c-651a1fccbf09">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#248c5cd8-448a-4e0f-a9ee-66c22393cca4">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="a2"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a62408af-5b92-4859-b7f3-e340adc3c2e4">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#91d5a592-942e-4b77-a875-07f1285ae72f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Details"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#2a6d717d-be35-4c4c-bd8e-5986a380827d">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="a2"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#b31ff5d2-b589-4019-9dda-5918689e3f04">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="a2"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

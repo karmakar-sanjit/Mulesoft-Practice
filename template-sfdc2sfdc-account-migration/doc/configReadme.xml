@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<configuration>
+	<placeholders>
+		<placeholder id="template_name">Salesforce to Salesforce Account Migration</placeholder>
+	</placeholders>
+	<sections>
+		<section id="use_case">
+As a Salesforce administrator I want to migrate accounts from one Salesforce organization to another one.
+
+This template serves as a foundation for the process of migrating accounts from one Salesforce instance to another, and specifying the filtering criteria and desired behavior when an account already exists in the destination org. 
+
+As implemented, this template leverages the Mule batch module.
+The batch job is divided into *Process* and *On Complete* stages.
+
+The migration process starts by fetching all the existing accounts that match the filter criteria from Salesforce Org A.
+On *Process* stage matches accounts that are grouped and inserted or updated into Salesforce Org B.
+
+Finally during the *On Complete* stage, the template both outputs statistics data to the console and sends a notification email with the results of the batch execution.		
+
+The template is covered by the integration tests using the MUnit. To be able to run the tests, see the example configuration of the test property file. 
+</section>
+		<section id="considerations">
+<![CDATA[
+To make this template run, there are certain preconditions that must be considered. All of them deal with the preparations in both, that must be made for all to run smoothly. 
+Failing to do so can lead to unexpected behavior of the template.
+]]>
+		</section>
+		<section id="running_on_cloudhub">
+<![CDATA[
+
+After your app is running, if you chose `sfdcaccountmigration` as the domain name to trigger the use case, you can browse to `http://sfdcaccountmigration.cloudhub.io/migrateaccounts` to run the app, and the report gets sent to the emails you configured.
+]]>
+		</section>
+		<section id="application_configuration">
+		<![CDATA[
+**HTTP Connector Configuration**
++ http.port `9090` 
+
+**Batch Aggregator Configuration**
++ page.size `1000`
+
+**Salesforce Connector Configuration for Company A**
++ sfdc.a.username `bob.dylan@orga`
++ sfdc.a.password `DylanPassword123`
++ sfdc.a.securityToken `avsfwCUl7apQs56Xq2AKi3X`
+
+**Salesforce Connector Configuration for Company B**
++ sfdc.b.username `joan.baez@orgb`
++ sfdc.b.password `JoanBaez456`
++ sfdc.b.securityToken `ces56arl7apQs56XTddf34X`
+
+**SMTP Services Configuration**
++ smtp.host `smtp.example.com`
++ smtp.port `587`
++ smtp.user `exampleuser`
++ smtp.password `examplepassword`
+
+**Email Details**
++ mail.from `your.email@example.com`
++ mail.to `your.email@example.com`
++ mail.subject `Mail subject`
+]]>
+		</section>
+		<section id="api_calls">
+		<![CDATA[
+Salesforce imposes limits on the number of API Calls that can be made. Therefore calculating this amount is important. This template calls the API using this formula:
+
+***1 + X + X / ${page.size}***
+
+***X*** is the number of accounts to be synchronized on each run. 
+
+Divide by ***${page.size}*** because by default, accounts are gathered in groups of ${page.size} for each Upsert API Call in the commit step.	
+
+For instance if 10 records are fetched from origin instance, then 12 API calls are made (1 + 10 + 1).
+]]>
+		</section>
+		<section id="default_endpoints_xml">
+		<![CDATA[
+This is the file where you specify the inbound and outbound sides of your integration app.
+This template only uses an HTTP Listener to trigger the use case.
+
+###  Inbound Flow
+**HTTP Listener** - Start Report Generation
++ `${http.port}` is set as a property to be defined either in a property file or in the CloudHub environment variables.
++ The path configured by default is `migrateaccounts` and you are free to change it to one you prefer.
++ The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub routes requests from your application domain URL to the endpoint.
++ The endpoint is configured as a *request-response* since as a result of calling it the response is the total of accounts synced and filtered by the criteria specified.
+]]>
+		</section>
+		<section id="default_business_logic_xml">
+		<![CDATA[
+The functional aspect of the template is implemented in this XML file, directed by one flow responsible of excecuting the logic.
+For the purpose of this particular template the *mainFlow* uses a Mule batch job, which handles all the logic.
+]]>
+		</section>
+	</sections>
+</configuration>

@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+    <http:listener-config name="batchprocessing-pro-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="batchprocessing-pro-api-config" api="resource::25710a96-bb91-488c-ac7d-10d41a194f60:batchprocessing-pro-api:1.0.0:raml:zip:batchprocessing-pro-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="d027be05-2ebb-4a16-a0f6-696f1ba35c07" >
+		<http:request-connection host="sys-api-file.us-e2.cloudhub.io" />
+	</http:request-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="5e7db881-6b41-4112-a29b-9685e3421de5" >
+		<file:connection workingDir="C:\Users\SANJIT\Documents" />
+	</file:config>
+	<ftp:config name="FTP_Config" doc:name="FTP Config" doc:id="deb161d1-53fc-4afb-bb66-5702be0a4694" >
+		<ftp:connection workingDir="/ My Documents" host="ftp.drivehq.com" username="Sanjit22" password="Sanjit@22" />
+	</ftp:config>
+	<flow name="batchprocessing-pro-api-main">
+        <http:listener config-ref="batchprocessing-pro-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="batchprocessing-pro-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="batchprocessing-pro-api-console">
+        <http:listener config-ref="batchprocessing-pro-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="batchprocessing-pro-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\batchprocessing:batchprocessing-pro-api-config">
+		<http:request method="GET" doc:name="Request" doc:id="9fbd5280-3d29-41c9-8d54-f4bb2c4640d5" config-ref="HTTP_Request_configuration" path="/api/readfile" />
+		<ee:transform doc:name="Transform Message" doc:id="e15c5019-3d7b-43eb-82d5-2d69e7295782" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map(data, index)->{
+	permalink: data.permalink,
+	company: data.company,
+	numEmps: data.numEmps,
+	category: data.category,
+	city: data.city,
+	state: data.state,
+	fundedDate: data.fundedDate,
+	raisedAmt: data.raisedAmt,
+	raisedCurrency: data.raisedCurrency,
+	round: data.round	
+}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="batchprocessing-pro-apiBatch_Job" doc:id="442d4608-0ea5-4090-9a32-330e058c5ff3" jobInstanceId="#['Job From ' ++ now() as String {format: 'dd/MM/yy hh:mm:ss'}]">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="afef425b-307a-4188-845c-a9cd027af053" >
+					<ee:transform doc:name="Transform Message" doc:id="1bdfb5ac-2fdd-4482-90c2-2a383f0238d3" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	permalink: payload.permalink,
+	company: payload.company,
+	numEmps: payload.numEmps,
+	category: payload.category,
+	city: payload.city,
+	state: payload.state,
+	fundedDate: payload.fundedDate,
+	raisedAmt: payload.raisedAmt,
+	raisedCurrency: payload.raisedCurrency,
+	round: payload.round
+}]]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="71c3dbd8-08f8-4f36-b027-324a66f0ad12" size="100">
+						<ee:transform doc:name="Transform Message" doc:id="0f71c18f-8298-4ff3-8a69-0f07bd2aa030" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	permalink: payload01.permalink,
+	company: payload01.company,
+	numEmps: payload01.numEmps,
+	category: payload01.category,
+	city: payload01.city,
+	state: payload01.state,
+	fundedDate: payload01.fundedDate,
+	raisedAmt: payload01.raisedAmt,
+	raisedCurrency: payload01.raisedCurrency,
+	round: payload01.round
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<ee:transform doc:name="Transform Message" doc:id="f3b2f51e-aa51-4d01-8002-fa8f49d0f4b9" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	permalink: payload.permalink,
+	company: payload.company,
+	numEmps: payload.numEmps,
+	catagory: payload.category,
+	city: payload.city,
+	state: payload.state,
+	fundedDate: payload.fundedDate,
+	raisedAmt: payload.raisedAmt,
+	raisedCurrency: payload.raisedCurrency,
+	round: payload.round
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<ee:transform doc:name="Transform Message" doc:id="d2afcaea-4576-4209-8fa1-ade71a0071bd" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv 
+---
+[{
+	permalink: payload.permalink,
+	company: payload.company,
+	numEmps: payload.numEmps,
+	category: payload.catagory,
+	city: payload.city,
+	state: payload.state,
+	fundedDate: payload.fundedDate,
+	raisedAmt: payload.raisedAmt,
+	raisedCurrency: payload.raisedCurrency,
+	round: payload.round
+}]]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<ftp:write doc:name="Write" doc:id="3437d017-54c3-4a31-a13e-ea1dffe65747" config-ref="FTP_Config" path="#['details.csv']"/>
+						<ee:transform doc:name="Transform Message" doc:id="5bcf0d70-74a3-41df-b17e-36cd40a46280" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"successful"]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+		<ee:transform doc:name="Transform Message" doc:id="b651f373-09e0-424c-9184-03c065ad5dfd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+</mule>

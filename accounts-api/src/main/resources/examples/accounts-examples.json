@@ -1,0 +1,26 @@
+[
+  {
+    "accountID": "4401",
+    "country": "India",
+    "creationDate": "2017-08-23T00:52:42",
+    "city": "Pune",
+    "street": "89 Nibm Road",
+    "name": "Rajesh Patil",
+    "accountType": "personal",
+    "state": "Maharashtra",
+    "postal": "59141",
+    "miles": 36470
+  },
+  {
+    "accountID": "4402",
+    "country": "New Zealand",
+    "creationDate": "2001-05-22T13:22:07",
+    "city": "Auckland",
+    "street": "45 Test Street",
+    "name": "Siva Mat",
+    "accountType": "personal",
+    "state": "Auckland",
+    "postal": "24328",
+    "miles": 105557
+  }
+]

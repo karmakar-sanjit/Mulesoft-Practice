@@ -1,0 +1,9 @@
+http:
+  port: "8081"
+  
+sfdc:
+  host: "localhost"
+  port: "3306"
+  user: "root"
+  password: "Sanjit@22"
+  database: "database1a"

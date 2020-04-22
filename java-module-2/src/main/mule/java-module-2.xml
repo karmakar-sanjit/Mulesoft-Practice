@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="09483506-f1f5-48f8-a440-12bd9c224134" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<flow name="java-module-2Flow" doc:id="acf49a13-e0b1-4491-ba79-652fe8d68414" >
+		<http:listener doc:name="Listener" doc:id="87b89f52-c18e-412c-80eb-d1587cbd6e56" config-ref="HTTP_Listener_config" path="/test"/>
+		<java:new constructor="Tripler()" doc:name="Tripler" doc:id="2d9e9e89-37da-431e-bcf1-a34d2a1cc14a" class="com.tcs.Tripler" target="tripler"/>
+		<logger level="INFO" doc:name="Tripler Instance" doc:id="80898c60-8981-48f6-933a-a6b4f66c08ac" message="new instance of tripler is : #[vars.tripler]"/>
+		<java:invoke method="setA(int)" doc:name="setA" doc:id="3669696c-8cd7-4c51-be99-84eef4637f08" instance="#[vars.tripler]" class="com.tcs.Tripler">
+			<java:args ><![CDATA[#[{a:1}]]]></java:args>
+		</java:invoke>
+		<java:invoke method="triple(int)" doc:name="triple" doc:id="b0ff662d-fdb2-47c2-abde-cdad769b2004" instance="#[vars.tripler]" class="com.tcs.Tripler" target="result"/>
+		<logger level="INFO" doc:name="Logger" doc:id="52fb35bd-f338-4f9e-9774-c210cd4137b8" message="the result of triple is : #[vars.result]"/>
+	</flow>
+</mule>

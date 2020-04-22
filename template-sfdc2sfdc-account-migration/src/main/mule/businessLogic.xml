@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	
+	<flow name="businessLogicFlow" doc:id="aff4106d-d2f6-4366-940a-a380dcb1cf73" >
+		<batch:job jobName="migrateAccountsBatch" doc:id="204892ae-0d97-4326-beae-310c8d52b7a6" >
+			<batch:process-records >
+				<batch:step name="Batch_Step-query-a-destination-instance-B" doc:id="89713774-362a-4e92-9bdc-41e31802bf38" >
+					<salesforce:query-single config-ref="Salesforce_Sfdc_configB" doc:name="Query Account in Salesforce instance B" doc:id="e828fbe5-8917-4833-a479-8df69b560884" target="IdInB">
+						<salesforce:salesforce-query>SELECT Id FROM Account WHERE Name = ':name'</salesforce:salesforce-query>
+						<salesforce:parameters ><![CDATA[#[output applicaton/java
+---
+{
+	"name" : payload.Name
+}]]]></salesforce:parameters>
+					</salesforce:query-single>
+					<ee:transform doc:name="Enrich Payload with IdInB" doc:id="c119f87d-9095-4962-b961-efe507b06a0c" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload ++ vars.IdInB]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="Batch_Step-migrate-data-to-destination-instance-B" doc:id="78a74ab4-9b91-416d-985a-acda2ac377eb">
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="1ad86a98-643e-494a-a90a-32daab0b03cc" size="${page.size}">
+						<ee:transform doc:name="Prepare data for  Upsert" doc:id="d484063f-6d81-42ce-98ef-7cec51b04672" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map {
+	Id: $.Id,
+	AccountNumber: $.AccountNumber,
+	Description: $.Description,
+	Name: $.Name,
+	Industry: $.Industry,
+	NumberOfEmployees: $.NumberOfEmployees
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<salesforce:upsert-bulk config-ref="Salesforce_Sfdc_configB" type="Account" externalIdFieldName="Id" doc:name="Upsert bulk - Accounts in Salesforce instance B" doc:id="26dee78b-3cbd-41d7-a260-538058420b0e" />
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete>
+				<scatter-gather doc:name="Scatter-Gather" doc:id="ef2964ef-0b85-4c6c-a5ee-b834df639e7b" >
+					<route >
+						<logger level="INFO" doc:name="Migration process has finished!" doc:id="b7575d38-7dbd-4602-9186-1bbb25234896" message="Migration process has finished!" />
+					</route>
+					<route >
+						<ee:transform doc:name="Prepare migration result email" doc:id="c84b4bc4-5a65-41c1-9d0c-f1ebd3d8db7a" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+"Migration Report: \n"
+ 
+++ "\n Time [milliseconds]: " 		++ payload.elapsedTimeInMillis!
+++ "\n Total Records: "				++ payload.totalRecords!
+++ "\n Successful Records: "		++ payload.successfulRecords!
+++ "\n Failed Records: "			++ payload.failedRecords!
+++ "\n Loaded Records: "			++ payload.loadedRecords!
+++ "\n Processed Records: " 		++ payload.processedRecords!]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<email:send config-ref="Email_SMTPS" doc:name="Send email" doc:id="5896eaa9-dd10-47a2-a6fc-6319b11dbd06" fromAddress="${mail.from}" subject="${mail.subject}" >
+							<email:to-addresses >
+								<email:to-address value="${mail.to}" />
+							</email:to-addresses>
+						</email:send>
+					</route>
+				</scatter-gather>
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Log - Migration process has started!" doc:id="673c18b0-db38-44f6-95ef-69edd1e75ed6" message="Migration process has started!" />
+	</flow>
+	
+	<flow name="queryFlow" doc:id="b0338e9a-92cc-4b2a-b219-4360c4a7bdb0" >
+		<salesforce:query config-ref="Salesforce_Sfdc_configA" doc:name="Query Accounts from Salesforce instance A" doc:id="ebcf71a8-3192-4437-b2cb-b23f008afae5">
+			<salesforce:salesforce-query>SELECT AccountNumber, Description, Industry, Name, NumberOfEmployees FROM Account WHERE NumberOfEmployees &gt; 5000 AND (Industry = 'Education' OR Industry = 'Government')</salesforce:salesforce-query>
+		</salesforce:query>
+	</flow>
+	<flow name="mainFlow" doc:id="7c0a5bef-b3d5-442f-bff3-10d038f69a5e" >
+		<flow-ref doc:name="queryFlow" doc:id="d64e1df5-1fa7-4999-a717-9ff2e7bfba32" name="queryFlow"/>
+		<flow-ref doc:name="businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0" name="businessLogicFlow"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="488b507d-e26c-4c56-8759-8bb4f6645d71" type="ANY">
+				<flow-ref doc:name="errorHandlingFlow" doc:id="afdaf73c-0137-4d60-84f6-5c41234771a3" name="errorHandlingFlow" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

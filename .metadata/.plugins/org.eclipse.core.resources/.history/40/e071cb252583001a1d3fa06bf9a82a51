@@ -1,0 +1,7 @@
+package com.tcs;
+
+public class CompanyDetails {
+	public static String commonDetails(String country, String sector) {
+		return "Country : " + country + "         Sector : " + sector;
+	}
+}

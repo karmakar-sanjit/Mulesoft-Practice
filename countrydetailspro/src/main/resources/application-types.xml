@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="countryDetailsMatadata" format="json">
+      <types:shape format="weave" example="examples/countryDetails.json"><![CDATA[%dw 2.0
+
+type countryDetailsMatadata = {|
+  ISOCode: String, 
+  CountryName: String, 
+  CapitalCity: String, 
+  PhoneCode: Number {"typeId": "int"}, 
+  ContinentCode: String, 
+  CurrencyISOCode: String, 
+  CountryFlag: String, 
+  Language: {|
+    LanguageISOCode: String, 
+    LanguageName: String
+  |}
+|} {"example": "{\\\"ISOCode\\\":\\\"IN\\\",\\\"CountryName\\\":\\\"India\\\",\\\"CapitalCity\\\":\\\"New Delhi\\\",\\\"PhoneCode\\\":91,\\\"ContinentCode\\\":\\\"AS\\\",\\\"CurrencyISOCode\\\":\\\"INR\\\",\\\"CountryFlag\\\":\\\"http:\\/\\/www.oorsprong.org\\/WebSamples.CountryInfo\\/Flags\\/India.jpg\\\",\\\"Language\\\":{\\\"LanguageISOCode\\\":\\\"hin\\\",\\\"LanguageName\\\":\\\"Hindi\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="newMatadata" format="json">
+      <types:shape format="weave" example="examples/countryDetails-1.json"><![CDATA[%dw 2.0
+
+type newMatadata = {|
+  ISOCode: String, 
+  CountryName: String, 
+  CapitalCity: String, 
+  PhoneCode: Number {"typeId": "int"}, 
+  ContinentCode: String, 
+  CurrencyISOCode: String, 
+  CountryFlag: String, 
+  Language: {|
+    LanguageISOCode: String, 
+    LanguageName: String
+  |}
+|} {"example": "{\\\"ISOCode\\\":\\\"IN\\\",\\\"CountryName\\\":\\\"India\\\",\\\"CapitalCity\\\":\\\"New Delhi\\\",\\\"PhoneCode\\\":91,\\\"ContinentCode\\\":\\\"AS\\\",\\\"CurrencyISOCode\\\":\\\"INR\\\",\\\"CountryFlag\\\":\\\"http:\\/\\/www.oorsprong.org\\/WebSamples.CountryInfo\\/Flags\\/India.jpg\\\",\\\"Language\\\":{\\\"LanguageISOCode\\\":\\\"hin\\\",\\\"LanguageName\\\":\\\"Hindi\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#371e846a-0e8b-4bad-bf22-b38a9ce9a7fe">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="countryDetailsMatadata"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="countryDetailsMatadata"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

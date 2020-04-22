@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="21cb4506-7e0d-4143-8c54-bb13387aa40a" >
+		<wsc:connection wsdlLocation="http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso?WSDL" service="CountryInfoService" port="CountryInfoServiceSoap12" address="http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso" >
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<flow name="02-consuming-soap-web-serviceFlow" doc:id="74fef20a-694e-4ca5-84ed-6f3368a1e122" >
+		<http:listener doc:name="Listener" doc:id="24284cb3-fa14-45e7-bb16-44bd72112ffb" config-ref="HTTP_Listener_config" path="/countrydetails"/>
+		<choice doc:name="Choice" doc:id="e07e4928-cd00-4dfe-8b49-94ea99340281" >
+			<when expression="#[attributes.queryParams.countrycod == null]">
+				<flow-ref doc:name="Flow Reference" doc:id="2f4e8b99-5579-45b7-8518-758bc37c0a17" name="getAllCountryDetails"/>
+			</when>
+			<when expression="attributes.queryParams.countrycode != null">
+				<flow-ref doc:name="Flow Reference" doc:id="4b5069a5-33bb-4fef-9915-b5b7587fea82" />
+			</when>
+			<otherwise >
+				<set-payload value="Invalid" doc:name="Set Payload" doc:id="19ccfd6f-d6d7-4714-997a-3e559e9c95ea" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getAllCountryDetails" doc:id="aa22d62c-757c-441c-aca3-b956c4e35e49" >
+		<wsc:consume operation="FullCountryInfoAllCountries" doc:name="Consume" doc:id="aa2d8dba-807d-4305-9108-5b46ac906c43" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="871670cf-f772-4411-8251-c7251c75ab4a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+payload.body.FullCountryInfoAllCountriesResponse]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="02-consuming-soap-web-serviceFlow1" doc:id="1237dee1-b8f7-42a4-94db-4b2e66a9964b" >
+		<set-variable value="#[attributes.queryParams.countrycode]" doc:name="Set Variable" doc:id="40628773-5121-4c8e-9b96-bda8c04780dd" variableName="countryCodeVar"/>
+		<wsc:consume operation="FullCountryInfo" doc:name="Consume" doc:id="9ff9791a-a06d-4e24-933e-96660e9ab559" config-ref="Web_Service_Consumer_Config"/>
+	</flow>
+</mule>

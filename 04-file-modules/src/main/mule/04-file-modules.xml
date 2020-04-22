@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="cd6b0df3-c394-414f-bd81-bcafb51b6636" >
+		<file:connection workingDir="C:\Users\SANJIT\Documents\File Handling" />
+	</file:config>
+	<flow name="04-file-modulesFlow" doc:id="2c1ad08a-cf80-4cc2-a633-dd0b828d11db" >
+		<file:listener doc:name="On New or Updated File" doc:id="b30362de-b951-4430-b0b1-6360f4382ef9" config-ref="File_Config" directory="C:\Users\SANJIT\Documents\File Handling\Input" watermarkMode="CREATED_TIMESTAMP">
+			<scheduling-strategy >
+				<fixed-frequency />
+			</scheduling-strategy>
+		</file:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="d8a6807b-7224-4645-8934-f3e4c18fa87f" message="#[payload]"/>
+	</flow>
+</mule>

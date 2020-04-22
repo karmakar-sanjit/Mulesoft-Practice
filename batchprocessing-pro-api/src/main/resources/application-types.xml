@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="d1" format="csv">
+      <types:shape format="weave"><![CDATA[%dw 2.0
+
+type d1 = Array<{|  permalink: String,   company: String,   numEmps: String,   category: String,   city: String,   state: String,   fundedDate: String,   raisedAmt: String,   raisedCurrency: String,   round: String|}>
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+    <types:type name="qq" format="json">
+      <types:shape format="weave" example="examples/a2.json"><![CDATA[%dw 2.0
+
+type qq = {|
+  permalink: String, 
+  company: String, 
+  numEmps: String, 
+  catagory: String, 
+  city: String, 
+  state: String, 
+  fundedDate: String, 
+  raisedAmt: String, 
+  raisedCurrency: String, 
+  round: String
+|} {"example": "{\\\"permalink\\\":\\\"Facebook\\\",\\\"company\\\":\\\"facebook\\\",\\\"numEmps\\\":\\\"105\\\",\\\"catagory\\\":\\\"web\\\",\\\"city\\\":\\\"San Francisco\\\",\\\"state\\\":\\\"CA\\\",\\\"fundedDate\\\":\\\"01-12-2006\\\",\\\"raisedAmt\\\":\\\"85000000\\\",\\\"raisedCurrency\\\":\\\"USD\\\",\\\"round\\\":\\\"b\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#02349322-7bf0-44cd-ac40-902fabd8fec3">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="d1"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#e15c5019-3d7b-43eb-82d5-2d69e7295782">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="d1"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#153b7a1f-480a-46ff-adf2-2153d0e15001">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="qq"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#1bdfb5ac-2fdd-4482-90c2-2a383f0238d3">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="d1"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#0f71c18f-8298-4ff3-8a69-0f07bd2aa030">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="d1"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f3b2f51e-aa51-4d01-8002-fa8f49d0f4b9">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="qq"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#d2afcaea-4576-4209-8fa1-ade71a0071bd">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="d1"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

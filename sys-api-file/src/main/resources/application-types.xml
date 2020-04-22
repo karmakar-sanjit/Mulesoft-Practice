@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="details" format="json">
+      <types:shape format="weave" example="examples/a2.json"><![CDATA[%dw 2.0
+
+type details = {|
+  permalink: String, 
+  company: String, 
+  numEmps: String, 
+  catagory: String, 
+  city: String, 
+  state: String, 
+  fundedDate: String, 
+  raisedAmt: String, 
+  raisedCurrency: String, 
+  round: String
+|} {"example": "{\\\"permalink\\\":\\\"abcd\\\",\\\"company\\\":\\\"facebook\\\",\\\"numEmps\\\":\\\"105\\\",\\\"catagory\\\":\\\"web\\\",\\\"city\\\":\\\"San Francisco\\\",\\\"state\\\":\\\"CA\\\",\\\"fundedDate\\\":\\\"01-12-2006\\\",\\\"raisedAmt\\\":\\\"85000000\\\",\\\"raisedCurrency\\\":\\\"USD\\\",\\\"round\\\":\\\"b\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="d1" format="csv">
+      <types:shape format="weave"><![CDATA[%dw 2.0
+
+type d1 = Array<{|  permalink: String,   Company: String,   numEmps: String,   category: String,   city: String,   state: String,   fundedDate: String,   raisedAmt: String,   raisedCurrency: String,   round: String|}>
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+  </types:catalog>
+</types:mule>

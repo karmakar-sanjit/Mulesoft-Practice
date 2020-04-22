@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4a34a5e3-c1e0-446e-89d9-122d5be8a4a5" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="94402c44-03df-4d32-a18a-1931ca4de14c" />
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="8d3b12dd-46da-4bac-bf11-5bb187401018" >
+		<email:smtp-connection host="smtp.gmail.com" port="587" user="sanjitkarmakar2013@gmail.com" password="sanjit800201" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<flow name="mailconnectorFlow" doc:id="728bdbda-058e-44d7-9046-3b6c082a1461" >
+		<http:listener doc:name="Listener" doc:id="9482a998-0a57-43b8-be02-1e5d8ea047ea" config-ref="HTTP_Listener_config" path="/mail"/>
+		<file:read doc:name="Read" doc:id="a2442c96-f4b6-4ee6-9b53-92613d6775a1" config-ref="File_Config" path="C:\Users\SANJIT\Downloads\TechCrunchcontinentalUSA.csv"/>
+		<email:send doc:name="Send" doc:id="52b7f736-c9db-4abd-9159-570c7e85c918" config-ref="Email_SMTP" fromAddress="sanjitkarmakar2013@gmail.com" subject="Mail from Mule 4">
+			<email:to-addresses >
+				<email:to-address value="sanjitkarmakar94@gmail.com" />
+			</email:to-addresses>
+			<email:body contentType="text/plain" >
+				<email:content ><![CDATA[Please Find the Attachment...!!]]></email:content>
+			</email:body>
+			<email:attachments > #[{
+          'csv-attachment.csv' : payload
+        }]</email:attachments>
+		</email:send>
+		<set-payload value="sucessful" doc:name="Set Payload" doc:id="573fa8f8-33f1-40ca-b6d1-c269fbd30796" />
+	</flow>
+</mule>

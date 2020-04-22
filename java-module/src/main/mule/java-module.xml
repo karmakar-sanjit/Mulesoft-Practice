@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b1ff1977-345e-438b-8b69-0a194f7d3560" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="java-moduleFlow" doc:id="352771d3-302b-4f7e-aa98-6a6b1e4eefbd" >
+		<http:listener doc:name="Listener" doc:id="e62c3ed0-7525-47ab-9203-7466c143e47a" config-ref="HTTP_Listener_config" path="/demo-static"/>
+		<java:invoke-static method="concat(java.lang.String,java.lang.String)" doc:name="Invoke static" doc:id="fa7c7931-0ebb-42b4-bf95-23404d53d125" class="com.tcs.StringOperations">
+			<java:args ><![CDATA[#[%dw 2.0
+output application/java
+---
+{
+	arg0: attributes.queryParams.firstName as String,
+	arg1: attributes.queryParams.lastName as String
+}]]]></java:args>
+		</java:invoke-static>
+	</flow>
+</mule>

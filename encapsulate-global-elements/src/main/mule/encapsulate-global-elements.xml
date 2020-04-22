@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	
+	<flow name="HelloFlow" doc:id="1dad8b9b-4312-4554-ada5-c789797e5c2e" >
+		<http:listener doc:name="GET /hello" doc:id="7d7a7438-0afc-4eed-bbb6-cf23db7ccdb7" config-ref="HTTP_Listener_config" path="/hello"/>
+		<flow-ref doc:name="subFlow" doc:id="2e1f84e7-8178-46fe-847f-6a879868a6d7" name="subFlow"/>
+		<vm:publish-consume doc:name="VM goodbye" doc:id="7fb868b8-8bc4-4be8-b213-d985cc93628f" config-ref="VM_Config" queueName="goodbye"/>
+		<logger level="INFO" doc:name="Payload" doc:id="38f62561-743f-4f28-9108-e8bcec5e77a7" message="#['\nMessage:' ++ payload as String]"/>
+	</flow>
+	<sub-flow name="subFlow" doc:id="6a2d78b0-4d4f-49ab-ac50-2a02a4d51116" >
+		<set-variable value="#[message.attributes.queryParams.fname]" doc:name="firstName" doc:id="8b68d368-2b7f-4c09-bd14-a205fddc6ebe" variableName="firstName" />
+		<set-payload value="Hello" doc:name="Hello" doc:id="0c80b692-88c3-42e0-8257-1bc638a5fb5b" />
+	</sub-flow>
+	<flow name="goodbyeFlow" doc:id="7682de7a-017d-4c92-a340-739940be9e73" >
+		<vm:listener queueName="goodbye" doc:name="VM goodbye" doc:id="b8c77910-cbac-4794-936d-71dd84cc05ea" config-ref="VM_Config"/>
+		<set-payload value="#[upper('Goodbye') ++ ' ' ++ (attributes.queryParams.name default 'Maxine')]" doc:name="Goodbye" doc:id="2f4a4309-34cb-421f-a6e6-040d7cd1df52" />
+		<logger level="INFO" doc:name="fullName" doc:id="45cac137-65b4-4149-a426-31f6e9dc1342" message="#[attributes.queryParams.name]"/>
+	</flow>
+</mule>

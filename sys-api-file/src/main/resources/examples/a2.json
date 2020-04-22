@@ -1,0 +1,12 @@
+{
+        "permalink": "abcd",
+        "company": "facebook",
+        "numEmps": "105",
+        "catagory": "web",
+        "city": "San Francisco",
+        "state": "CA",
+        "fundedDate": "01-12-2006",
+        "raisedAmt": "85000000",
+        "raisedCurrency": "USD",
+        "round": "b"	
+}

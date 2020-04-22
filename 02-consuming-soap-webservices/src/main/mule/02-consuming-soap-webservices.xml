@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="92b334d5-162b-4f86-bdd9-dce1fa8ee0c2" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="86fa4796-4b5e-4567-b6d0-9d97643a5f58" >
+		<wsc:connection wsdlLocation="http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso?WSDL" service="CountryInfoService" port="CountryInfoServiceSoap12" address="http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso" >
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<flow name="02-consuming-soap-webservicesFlow" doc:id="0d1bdc42-6480-424d-831f-7ca645c978e8" >
+		<http:listener doc:name="Listener" doc:id="8e29b877-ef75-4e30-ba75-ab3090e8b02b" config-ref="HTTP_Listener_config" path="/countrydetails"/>
+		<choice doc:name="Choice" doc:id="b9da22d2-90a4-442f-965f-9ea3424a5796" >
+			<when expression="#[attributes.queryParams.CountryISOCode == null]">
+				<flow-ref doc:name="AllCountriesInfo" doc:id="df18eaa2-f121-4009-88f9-ee94ec9c26a5" name="AllCountriesInfo"/>
+			</when>
+			<when expression="#[attributes.queryParams.CountryISOCode != null]">
+				<flow-ref doc:name="countryInfoByCountryCode" doc:id="643e66de-3572-4414-bd0c-1eb9c0a8780c" name="countryInfoByCountryCode"/>
+			</when>
+			<otherwise >
+				<set-payload value="Invaild" doc:name="Set Payload" doc:id="b7a84875-4430-4485-ae39-e0d1003d974d" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="AllCountriesInfo" doc:id="fe4c2636-306c-46f0-8b10-caa334bd6a6f" >
+		<wsc:consume operation="FullCountryInfoAllCountries" doc:name="AllCountriesInfo" doc:id="eba0db9a-f972-4b7d-bc32-68d177261700" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="033db5b1-1e65-4370-8492-f3a234a61879" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+payload.body.FullCountryInfoAllCountriesResponse]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="countryInfoByCountryCode" doc:id="1bdb6e81-943a-45dc-b3b4-f95de2ec4f09" >
+		<set-variable value="#[attributes.queryParams.CountryISOCode]" doc:name="Set Variable" doc:id="f9b0b399-a8aa-422e-942b-23a1a8d09c62" variableName="countryCode"/>
+		<ee:transform doc:name="Transform Message" doc:id="c1751189-1dcb-4566-a179-6954e4ccb2ae" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://www.oorsprong.org/websamples.countryinfo
+---
+{
+	ns0#FullCountryInfo: {
+		ns0#sCountryISOCode: vars.countryCode
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="FullCountryInfo" doc:name="Consume" doc:id="cdef6acb-e8f9-420b-a0c2-805fd533469c" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="899f944e-9ba1-460a-81d1-c70e1297890e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+payload.body.FullCountryInfoResponse]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
